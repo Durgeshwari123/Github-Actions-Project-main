@@ -21,7 +21,7 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        run: mvn compile
+        run: mvn clean compile
 
 
   security-check:
@@ -64,8 +64,8 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Run Tests
-        run: mvn test
+      - name: Run Tests with Coverage
+        run: mvn clean test jacoco:report
 
 
   build_project_and_sonar_scan:
@@ -94,15 +94,16 @@ jobs:
           name: app-jar
           path: target/*.jar
 
-      - name: SonarQube Scan
+      - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v5.0.0
-        with:
-          args: >
-            -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.projectKey=Github-Actions-Project-main
-            -Dsonar.organization=durgeshwari123
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+        with:
+          args: >
+            -Dsonar.projectKey=Github-Actions-Project-main
+            -Dsonar.organization=durgeshwari123
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
 
 
   build_docker_image_and_push:
@@ -136,7 +137,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: adijaiswal/bankapp:latest
+          tags: adijaiswal/bankapp:${{ github.run_number }}
           file: ./Dockerfile
 
 
